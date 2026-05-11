@@ -57,16 +57,14 @@ func main() {
 		{Name: "Venus Express", Prefix: "6000"},
 	}
 
-    is_valid := LuhnCheck("4000123456789011")
+    is_valid := LuhnCheck("4000123456789017")
     
 	fmt.Println("Валиден по Луне:", is_valid)
 
-	if is_valid {
-        bank_name := DetectBank("4000123456789011", banks)
-		if bank_name != nil {
-            fmt.Println("Банк:", bank_name.Name)
-		}
+	if !is_valid {
+		fmt.Println("Банк: не определен")
 	}else{
-	    fmt.Println("Банк: не определен")	
+		fmt.Println("Банк:", DetectBank("4000123456789017", banks).Name)
 	}
+
 }

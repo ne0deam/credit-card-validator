@@ -63,7 +63,9 @@ func main() {
 
 	if is_valid {
         bank_name := DetectBank("4000123456789011", banks)
-		fmt.Println("Банк:", bank_name.Name)
+		if bank_name.Name != nil {
+            fmt.Println("Банк:", bank_name.Name)
+		}
 	}else{
 	    fmt.Println("Банк: не определен")	
 	}

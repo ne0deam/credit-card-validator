@@ -1,17 +1,19 @@
 package main
 
 import (
-	"fmt";
+	"bufio"
+	"fmt"
+	"os"
 	"strings"
 )
 
 type Bank struct {
-	Name string
+	Name   string
 	Prefix string
 }
 
 func DetectBank(cardNumber string, banks []Bank) *Bank {
-	for i:= 0; i < len(banks); i++ {
+	for i := 0; i < len(banks); i++ {
 		if strings.HasPrefix(cardNumber, banks[i].Prefix) {
 			return &banks[i]
 		}
@@ -23,8 +25,8 @@ func DetectBank(cardNumber string, banks []Bank) *Bank {
 func LuhnCheck(cardNumber string) bool {
 	sum := 0
 	var even bool
-    
-    if cardNumber == "" {
+
+	if cardNumber == "" {
 		return false
 	}
 
@@ -36,7 +38,7 @@ func LuhnCheck(cardNumber string) bool {
 		digit := int(cardNumber[i] - '0')
 
 		if even {
-            digit *= 2
+			digit *= 2
 		}
 
 		if digit > 9 {
@@ -50,21 +52,55 @@ func LuhnCheck(cardNumber string) bool {
 	return sum%10 == 0
 }
 
-func main() {
-    banks := []Bank{
-	    {Name: "Lunar Bank", Prefix: "4000"},
-		{Name: "Mars Credit Union", Prefix: "5000"}, 
-		{Name: "Venus Express", Prefix: "6000"},
+func loadBankData(path string) ([]Bank, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("не удалось открыть файл %w", err)
+	}
+	defer file.Close()
+
+	banks := []Bank{}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) == 0 {
+			continue
+		}
+
+		line = strings.TrimSpace(line)
+		items := strings.Split(line, ",")
+		if len(items) != 2 {
+			return nil, fmt.Errorf("неверный формат строки: %q", line)
+		}
+		bankName := strings.TrimSpace(items[0])
+		bankPrefix := strings.TrimSpace(items[1])
+
+		banks = append(banks, Bank{bankName, bankPrefix})
 	}
 
-    is_valid := LuhnCheck("4000123456789017")
-    
-	fmt.Println("Валиден по Луне:", is_valid)
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
 
-	if !is_valid {
+	fmt.Println("Загружено банков:", len(banks))
+
+	return banks, nil
+}
+
+func main() {
+	banks, err := loadBankData("banks.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	isValid := LuhnCheck("4000123456789017")
+
+	fmt.Println("Валиден по Луне:", isValid)
+
+	if !isValid {
 		fmt.Println("Банк: не определен")
-	}else{
+	} else {
 		fmt.Println("Банк:", DetectBank("4000123456789017", banks).Name)
 	}
-
 }

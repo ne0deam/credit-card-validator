@@ -123,26 +123,26 @@ func main() {
 
 	for {
 		userInput := getUserInput()
-		err := validateInput(userInput)
-		if err != nil {
-			if userInput != "" {
+		if userInput == "" {
+			fmt.Println("До свидания!")
+			break
+		} else {
+			err := validateInput(userInput)
+			if err != nil {
 				fmt.Println(err)
 				continue
 			} else {
-				fmt.Println("До свидания!")
-				break
-			}
-		} else {
-			isValid := LuhnCheck(userInput)
-			if !isValid {
-				fmt.Println("Ошибка: номер не прошёл проверку Луна")
-				continue
-			} else {
-				bank := DetectBank(userInput, banks)
-				if bank != nil {
-					fmt.Println("Банк:", bank.Name)
+				isValid := LuhnCheck(userInput)
+				if !isValid {
+					fmt.Println("Ошибка: номер не прошёл проверку Луна")
+					continue
 				} else {
-					fmt.Println("Неизвестный банк")
+					bank := DetectBank(userInput, banks)
+					if bank != nil {
+						fmt.Println("Банк:", bank.Name)
+					} else {
+						fmt.Println("Неизвестный банк")
+					}
 				}
 			}
 		}

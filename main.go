@@ -99,6 +99,21 @@ func getUserInput() string {
 	return input
 }
 
+func validateInput(cardNumber string) error {
+	minLen := 13
+	maxLen := 19
+	lenInput := len(cardNumber)
+	for _, char := range cardNumber {
+		if char < '0' || char > '9' {
+			return fmt.Errorf("Ошибка: номер должен содержать только цифры")
+		}
+	}
+	if lenInput < minLen || lenInput > maxLen {
+		return fmt.Errorf("Ошибка: номер должен содержать от %d до %d цифр", minLen, maxLen)
+	}
+	return nil
+}
+
 func main() {
 	banks, err := loadBankData("banks.txt")
 	if err != nil {
@@ -108,18 +123,28 @@ func main() {
 
 	for {
 		userInput := getUserInput()
-		if userInput != "" {
-			isValid := LuhnCheck(userInput)
-			fmt.Println("Валиден по Луне:", isValid)
-
-			if !isValid {
-				fmt.Println("Банк: не определен")
+		err := validateInput(userInput)
+		if err != nil {
+			if userInput != "" {
+				fmt.Println(err)
+				continue
 			} else {
-				fmt.Println("Банк:", DetectBank(userInput, banks).Name)
+				fmt.Println("До свидания!")
+				break
 			}
 		} else {
-			fmt.Println("До встречи!")
-			break
+			isValid := LuhnCheck(userInput)
+			if !isValid {
+				fmt.Println("Ошибка: номер не прошёл проверку Луна")
+				continue
+			} else {
+				bank := DetectBank(userInput, banks)
+				if bank != nil {
+					fmt.Println("Банк:", bank.Name)
+				} else {
+					fmt.Println("Неизвестный банк")
+				}
+			}
 		}
 	}
 }
